@@ -1,16 +1,15 @@
 package com.luck.picture.lib.widget;
 
 import android.content.Context;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import androidx.viewpager.widget.ViewPager;
+
 /**
- * author：luck
- * project：PreviewViewPager
- * package：com.luck.picture.ui
- * email：893855882@qq.com
- * data：16/12/31
+ * @author：luck
+ * @date：2016-12-31 22:12
+ * @describe：PreviewViewPager
  */
 
 public class PreviewViewPager extends ViewPager {

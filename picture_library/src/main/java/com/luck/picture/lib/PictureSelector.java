@@ -3,12 +3,14 @@ package com.luck.picture.lib;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.style.PictureParameterStyle;
 import com.luck.picture.lib.tools.DoubleUtils;
 
 import java.io.Serializable;
@@ -17,12 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author：luck
- * project：PictureSelector
- * package：com.luck.picture.lib
- * describe：for PictureSelector's media selection.
- * email：893855882@qq.com
- * data：2017/5/24
+ * @author：luck
+ * @date：2017-5-24 22:30
+ * @describe：PictureSelector
  */
 
 public final class PictureSelector {
@@ -64,19 +63,19 @@ public final class PictureSelector {
     }
 
     /**
-     * @param mimeType Select the type of picture you want，all or Picture or Video .
+     * @param chooseMode Select the type of picture you want，all or Picture or Video .
      * @return LocalMedia PictureSelectionModel
      */
-    public PictureSelectionModel openGallery(int mimeType) {
-        return new PictureSelectionModel(this, mimeType);
+    public PictureSelectionModel openGallery(int chooseMode) {
+        return new PictureSelectionModel(this, chooseMode);
     }
 
     /**
-     * @param mimeType Select the type of picture you want，Picture or Video.
+     * @param chooseMode Select the type of picture you want，Picture or Video.
      * @return LocalMedia PictureSelectionModel
      */
-    public PictureSelectionModel openCamera(int mimeType) {
-        return new PictureSelectionModel(this, mimeType, true);
+    public PictureSelectionModel openCamera(int chooseMode) {
+        return new PictureSelectionModel(this, chooseMode, true);
     }
 
     /**
@@ -86,7 +85,19 @@ public final class PictureSelector {
      * @return
      */
     public PictureSelectionModel themeStyle(int themeStyle) {
-        return new PictureSelectionModel(this, PictureMimeType.ofImage()).theme(themeStyle);
+        return new PictureSelectionModel(this, PictureMimeType.ofImage())
+                .theme(themeStyle);
+    }
+
+    /**
+     * 外部预览时动态代码设置样式
+     *
+     * @param style
+     * @return
+     */
+    public PictureSelectionModel setPictureStyle(PictureParameterStyle style) {
+        return new PictureSelectionModel(this, PictureMimeType.ofImage())
+                .setPictureStyle(style);
     }
 
     /**
@@ -142,13 +153,14 @@ public final class PictureSelector {
      * @param position
      * @param medias
      */
-    public void externalPicturePreview(int position, List<LocalMedia> medias) {
+    public void externalPicturePreview(int position, List<LocalMedia> medias, int enterAnimation) {
         if (!DoubleUtils.isFastDoubleClick()) {
             Intent intent = new Intent(getActivity(), PictureExternalPreviewActivity.class);
             intent.putExtra(PictureConfig.EXTRA_PREVIEW_SELECT_LIST, (Serializable) medias);
             intent.putExtra(PictureConfig.EXTRA_POSITION, position);
             getActivity().startActivity(intent);
-            getActivity().overridePendingTransition(R.anim.a5, 0);
+            getActivity().overridePendingTransition(enterAnimation != 0
+                    ? enterAnimation : R.anim.picture_anim_enter, R.anim.picture_anim_fade_in);
         }
     }
 
@@ -159,14 +171,15 @@ public final class PictureSelector {
      * @param medias
      * @param directory_path
      */
-    public void externalPicturePreview(int position, String directory_path, List<LocalMedia> medias) {
+    public void externalPicturePreview(int position, String directory_path, List<LocalMedia> medias, int enterAnimation) {
         if (!DoubleUtils.isFastDoubleClick()) {
             Intent intent = new Intent(getActivity(), PictureExternalPreviewActivity.class);
             intent.putExtra(PictureConfig.EXTRA_PREVIEW_SELECT_LIST, (Serializable) medias);
             intent.putExtra(PictureConfig.EXTRA_POSITION, position);
             intent.putExtra(PictureConfig.DIRECTORY_PATH, directory_path);
             getActivity().startActivity(intent);
-            getActivity().overridePendingTransition(R.anim.a5, 0);
+            getActivity().overridePendingTransition(enterAnimation != 0
+                    ? enterAnimation : R.anim.picture_anim_enter, R.anim.picture_anim_fade_in);
         }
     }
 
@@ -193,7 +206,7 @@ public final class PictureSelector {
             Intent intent = new Intent(getActivity(), PicturePlayAudioActivity.class);
             intent.putExtra("audio_path", path);
             getActivity().startActivity(intent);
-            getActivity().overridePendingTransition(R.anim.a5, 0);
+            getActivity().overridePendingTransition(R.anim.picture_anim_enter, 0);
         }
     }
 

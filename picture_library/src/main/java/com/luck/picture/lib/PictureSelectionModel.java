@@ -2,52 +2,90 @@ package com.luck.picture.lib;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.FloatRange;
-import android.support.annotation.IntRange;
-import android.support.annotation.StyleRes;
-import android.support.v4.app.Fragment;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntRange;
+import androidx.annotation.StyleRes;
+import androidx.fragment.app.Fragment;
 
 import com.luck.picture.lib.config.PictureConfig;
+import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.PictureSelectionConfig;
+import com.luck.picture.lib.engine.ImageEngine;
 import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.style.PictureWindowAnimationStyle;
+import com.luck.picture.lib.style.PictureCropParameterStyle;
+import com.luck.picture.lib.style.PictureParameterStyle;
 import com.luck.picture.lib.tools.DoubleUtils;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author：luck
- * project：PictureSelector
- * package：com.luck.picture.lib
- * describe：PictureSelector selection configuration.
- * email：893855882@qq.com
- * data：2017/5/24
+ * @author：luck
+ * @date：2017-5-24 21:30
+ * @describe：PictureSelectionModel
  */
 
 public class PictureSelectionModel {
     private PictureSelectionConfig selectionConfig;
     private PictureSelector selector;
 
-    public PictureSelectionModel(PictureSelector selector, int mimeType) {
+    public PictureSelectionModel(PictureSelector selector, int chooseMode) {
         this.selector = selector;
         selectionConfig = PictureSelectionConfig.getCleanInstance();
-        selectionConfig.mimeType = mimeType;
+        selectionConfig.chooseMode = chooseMode;
     }
 
-    public PictureSelectionModel(PictureSelector selector, int mimeType, boolean camera) {
+    public PictureSelectionModel(PictureSelector selector, int chooseMode, boolean camera) {
         this.selector = selector;
         selectionConfig = PictureSelectionConfig.getCleanInstance();
         selectionConfig.camera = camera;
-        selectionConfig.mimeType = mimeType;
+        selectionConfig.chooseMode = chooseMode;
     }
 
     /**
      * @param themeStyleId PictureSelector Theme style
-     * @return
+     * @return 废弃 改为动态设置
      */
     public PictureSelectionModel theme(@StyleRes int themeStyleId) {
         selectionConfig.themeStyleId = themeStyleId;
+        return this;
+    }
+
+    /**
+     * @param locale Language
+     * @return
+     */
+    public PictureSelectionModel setLanguage(int language) {
+        selectionConfig.language = language;
+        return this;
+    }
+
+    /**
+     * Change the desired orientation of this activity.  If the activity
+     * is currently in the foreground or otherwise impacting the screen
+     * orientation, the screen will immediately be changed (possibly causing
+     * the activity to be restarted). Otherwise, this will be used the next
+     * time the activity is visible.
+     *
+     * @param requestedOrientation An orientation constant as used in
+     *                             {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
+     */
+    public PictureSelectionModel setRequestedOrientation(int requestedOrientation) {
+        selectionConfig.requestedOrientation = requestedOrientation;
+        return this;
+    }
+
+    /**
+     * @param engine Image Load the engine
+     * @return
+     */
+    public PictureSelectionModel loadImageEngine(ImageEngine engine) {
+        if (selectionConfig.imageEngine != engine) {
+            selectionConfig.imageEngine = engine;
+        }
         return this;
     }
 
@@ -61,6 +99,15 @@ public class PictureSelectionModel {
     }
 
     /**
+     * @param isWeChatStyle Select style with or without WeChat enabled
+     * @return
+     */
+    public PictureSelectionModel isWeChatStyle(boolean isWeChatStyle) {
+        selectionConfig.isWeChatStyle = isWeChatStyle;
+        return this;
+    }
+
+    /**
      * @param enableCrop Do you want to start cutting ?
      * @return
      */
@@ -70,7 +117,7 @@ public class PictureSelectionModel {
     }
 
     /**
-     * @param enablePreviewAudio Do you want to play audio ?
+     * @param enablePreviewAudio Do you want to ic_play audio ?
      * @return
      */
     public PictureSelectionModel enablePreviewAudio(boolean enablePreviewAudio) {
@@ -172,6 +219,18 @@ public class PictureSelectionModel {
     }
 
     /**
+     * @param Select whether to return directly
+     * @return
+     */
+    public PictureSelectionModel isSingleDirectReturn(boolean isSingleDirectReturn) {
+        selectionConfig.isSingleDirectReturn = selectionConfig.selectionMode
+                == PictureConfig.SINGLE ? isSingleDirectReturn : false;
+        selectionConfig.isOriginalControl = selectionConfig.selectionMode
+                == PictureConfig.SINGLE && isSingleDirectReturn ? false : selectionConfig.isOriginalControl;
+        return this;
+    }
+
+    /**
      * @param videoQuality video quality and 0 or 1
      * @return
      */
@@ -181,9 +240,12 @@ public class PictureSelectionModel {
     }
 
     /**
+     * # alternative api cameraFileName(xxx.PNG);
+     *
      * @param suffixType PictureSelector media format
      * @return
      */
+    @Deprecated
     public PictureSelectionModel imageFormat(String suffixType) {
         selectionConfig.suffixType = suffixType;
         return this;
@@ -232,8 +294,9 @@ public class PictureSelectionModel {
     /**
      * @param width  glide width
      * @param height glide height
-     * @return
+     * @return 2.2.9开始Glide改为外部用户自己定义此方法没有意义了
      */
+    @Deprecated
     public PictureSelectionModel glideOverride(@IntRange(from = 100) int width,
                                                @IntRange(from = 100) int height) {
         selectionConfig.overrideWidth = width;
@@ -245,8 +308,9 @@ public class PictureSelectionModel {
      * @param sizeMultiplier The multiplier to apply to the
      *                       {@link com.bumptech.glide.request.target.Target}'s dimensions when
      *                       loading the resource.
-     * @return
+     * @return 2.2.9开始Glide改为外部用户自己定义此方法没有意义了
      */
+    @Deprecated
     public PictureSelectionModel sizeMultiplier(@FloatRange(from = 0.1f) float sizeMultiplier) {
         selectionConfig.sizeMultiplier = sizeMultiplier;
         return this;
@@ -272,10 +336,20 @@ public class PictureSelectionModel {
 
     /**
      * @param compressQuality crop compress quality default 90
-     * @return
+     * @return 请使用 cutOutQuality();方法
      */
+    @Deprecated
     public PictureSelectionModel cropCompressQuality(int compressQuality) {
         selectionConfig.cropCompressQuality = compressQuality;
+        return this;
+    }
+
+    /**
+     * @param cutQuality crop compress quality default 90
+     * @return
+     */
+    public PictureSelectionModel cutOutQuality(int cutQuality) {
+        selectionConfig.cropCompressQuality = cutQuality;
         return this;
     }
 
@@ -285,6 +359,16 @@ public class PictureSelectionModel {
      */
     public PictureSelectionModel compress(boolean isCompress) {
         selectionConfig.isCompress = isCompress;
+        return this;
+    }
+
+
+    /**
+     * @param compressQuality Image compressed output quality
+     * @return
+     */
+    public PictureSelectionModel compressQuality(int compressQuality) {
+        selectionConfig.compressQuality = compressQuality;
         return this;
     }
 
@@ -298,11 +382,67 @@ public class PictureSelectionModel {
     }
 
     /**
+     * @param focusAlpha After compression, the transparent channel is retained
+     * @return
+     */
+    public PictureSelectionModel compressFocusAlpha(boolean focusAlpha) {
+        selectionConfig.focusAlpha = focusAlpha;
+        return this;
+    }
+
+    /**
+     * @param isOriginalControl Whether the original image is displayed
+     * @return
+     */
+    public PictureSelectionModel isOriginalImageControl(boolean isOriginalControl) {
+        selectionConfig.isOriginalControl = selectionConfig.camera
+                || selectionConfig.chooseMode == PictureMimeType.ofVideo()
+                || selectionConfig.chooseMode == PictureMimeType.ofAudio() ? false : isOriginalControl;
+        return this;
+    }
+
+    /**
      * @param path save path
      * @return
      */
     public PictureSelectionModel compressSavePath(String path) {
         selectionConfig.compressSavePath = path;
+        return this;
+    }
+
+    /**
+     * Camera custom local file name
+     * # Such as xxx.png
+     *
+     * @param fileName
+     * @return
+     */
+    public PictureSelectionModel cameraFileName(String fileName) {
+        selectionConfig.cameraFileName = fileName;
+        return this;
+    }
+
+    /**
+     * crop custom local file name
+     * # Such as xxx.png
+     *
+     * @param renameCropFileName
+     * @return
+     */
+    public PictureSelectionModel renameCropFileName(String renameCropFileName) {
+        selectionConfig.renameCropFileName = renameCropFileName;
+        return this;
+    }
+
+    /**
+     * custom compress local file name
+     * # Such as xxx.png
+     *
+     * @param renameFile
+     * @return
+     */
+    public PictureSelectionModel renameCompressFile(String renameFile) {
+        selectionConfig.renameCompressFileName = renameFile;
         return this;
     }
 
@@ -334,11 +474,27 @@ public class PictureSelectionModel {
     }
 
     /**
-     * @param outputCameraPath Camera save path
+     * # Responding to the Q version of Android, it's all in the app
+     * sandbox so customizations are no longer provided
+     *
+     * @param outputCameraPath Camera save path   由于Android Q的原因 其实此方法作用的意义就没了
      * @return
      */
+    @Deprecated
     public PictureSelectionModel setOutputCameraPath(String outputCameraPath) {
         selectionConfig.outputCameraPath = outputCameraPath;
+        return this;
+    }
+
+
+    /**
+     * # file size The unit is M
+     *
+     * @param fileSize Filter file size
+     * @return
+     */
+    public PictureSelectionModel queryMaxFileSize(int fileSize) {
+        selectionConfig.filterFileSize = fileSize;
         return this;
     }
 
@@ -370,6 +526,24 @@ public class PictureSelectionModel {
     }
 
     /**
+     * @param isNotPreviewDownload Previews do not show downloads
+     * @return
+     */
+    public PictureSelectionModel isNotPreviewDownload(boolean isNotPreviewDownload) {
+        selectionConfig.isNotPreviewDownload = isNotPreviewDownload;
+        return this;
+    }
+
+    /**
+     * @param Specify get image format
+     * @return
+     */
+    public PictureSelectionModel querySpecifiedFormatSuffix(String specifiedFormat) {
+        selectionConfig.specifiedFormat = specifiedFormat;
+        return this;
+    }
+
+    /**
      * @param openClickSound Whether to open click voice
      * @return
      */
@@ -394,7 +568,214 @@ public class PictureSelectionModel {
         if (selectionMedia == null) {
             selectionMedia = new ArrayList<>();
         }
+        if (selectionConfig.selectionMode == PictureConfig.SINGLE
+                && selectionConfig.isSingleDirectReturn) {
+            selectionMedia.clear();
+        }
         selectionConfig.selectionMedias = selectionMedia;
+        return this;
+    }
+
+    /**
+     * 是否改变状态栏字段颜色(黑白字体转换)
+     * #适合所有style使用
+     *
+     * @param isChangeStatusBarFontColor
+     * @return
+     */
+    @Deprecated
+    public PictureSelectionModel isChangeStatusBarFontColor(boolean isChangeStatusBarFontColor) {
+        selectionConfig.isChangeStatusBarFontColor = isChangeStatusBarFontColor;
+        return this;
+    }
+
+    /**
+     * 选择图片样式0/9
+     * #适合所有style使用
+     *
+     * @param isOpenStyleNumComplete
+     * @return 使用setPictureStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel isOpenStyleNumComplete(boolean isOpenStyleNumComplete) {
+        selectionConfig.isOpenStyleNumComplete = isOpenStyleNumComplete;
+        return this;
+    }
+
+    /**
+     * 是否开启数字选择模式
+     * #适合qq style 样式使用
+     *
+     * @param isOpenStyleCheckNumMode
+     * @return 使用setPictureStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel isOpenStyleCheckNumMode(boolean isOpenStyleCheckNumMode) {
+        selectionConfig.isOpenStyleCheckNumMode = isOpenStyleCheckNumMode;
+        return this;
+    }
+
+    /**
+     * 设置标题栏背景色
+     *
+     * @param color
+     * @return 使用setPictureStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setTitleBarBackgroundColor(@ColorInt int color) {
+        selectionConfig.titleBarBackgroundColor = color;
+        return this;
+    }
+
+
+    /**
+     * 状态栏背景色
+     *
+     * @param color
+     * @return 使用setPictureStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setStatusBarColorPrimaryDark(@ColorInt int color) {
+        selectionConfig.pictureStatusBarColor = color;
+        return this;
+    }
+
+
+    /**
+     * 裁剪页面标题背景色
+     *
+     * @param color
+     * @return 使用setPictureCropStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setCropTitleBarBackgroundColor(@ColorInt int color) {
+        selectionConfig.cropTitleBarBackgroundColor = color;
+        return this;
+    }
+
+    /**
+     * 裁剪页面状态栏背景色
+     *
+     * @param color
+     * @return 使用setPictureCropStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setCropStatusBarColorPrimaryDark(@ColorInt int color) {
+        selectionConfig.cropStatusBarColorPrimaryDark = color;
+        return this;
+    }
+
+    /**
+     * 裁剪页面标题文字颜色
+     *
+     * @param color
+     * @return 使用setPictureCropStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setCropTitleColor(@ColorInt int color) {
+        selectionConfig.cropTitleColor = color;
+        return this;
+    }
+
+    /**
+     * 设置相册标题右侧向上箭头图标
+     *
+     * @param resId
+     * @return 使用setPictureStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setUpArrowDrawable(int resId) {
+        selectionConfig.upResId = resId;
+        return this;
+    }
+
+    /**
+     * 设置相册标题右侧向下箭头图标
+     *
+     * @param resId
+     * @return 使用setPictureStyle方法
+     */
+    @Deprecated
+    public PictureSelectionModel setDownArrowDrawable(int resId) {
+        selectionConfig.downResId = resId;
+        return this;
+    }
+
+    /**
+     * 动态设置裁剪主题样式
+     *
+     * @param style 裁剪页主题
+     * @return
+     */
+    public PictureSelectionModel setPictureCropStyle(PictureCropParameterStyle style) {
+        selectionConfig.cropStyle = style;
+        return this;
+    }
+
+    /**
+     * 动态设置相册主题样式
+     *
+     * @param style 主题
+     * @return
+     */
+    public PictureSelectionModel setPictureStyle(PictureParameterStyle style) {
+        selectionConfig.style = style;
+        return this;
+    }
+
+    /**
+     * Dynamically set the album to start and exit the animation
+     *
+     * @param style Activity Launch exit animation theme
+     * @return
+     */
+    public PictureSelectionModel setPictureWindowAnimationStyle(PictureWindowAnimationStyle windowAnimationStyle) {
+        selectionConfig.windowAnimationStyle = windowAnimationStyle;
+        return this;
+    }
+
+    /**
+     * # If you want to handle the Android Q path, if not, just return the uri，
+     * The getAndroidQToPath(); field will be empty
+     *
+     * @param isAndroidQTransform
+     * @return
+     */
+    public PictureSelectionModel isAndroidQTransform(boolean isAndroidQTransform) {
+        selectionConfig.isAndroidQTransform = isAndroidQTransform;
+        return this;
+    }
+
+    /**
+     * # 内部方法-要使用此方法时最好先咨询作者！！！
+     *
+     * @param isFallbackVersion 仅供特殊情况内部使用 如果某功能出错此开关可以回退至之前版本
+     * @return
+     */
+    public PictureSelectionModel isFallbackVersion(boolean isFallbackVersion) {
+        selectionConfig.isFallbackVersion = isFallbackVersion;
+        return this;
+    }
+
+    /**
+     * # 内部方法-要使用此方法时最好先咨询作者！！！
+     *
+     * @param isFallbackVersion 仅供特殊情况内部使用 如果某功能出错此开关可以回退至之前版本
+     * @return
+     */
+    public PictureSelectionModel isFallbackVersion2(boolean isFallbackVersion) {
+        selectionConfig.isFallbackVersion2 = isFallbackVersion;
+        return this;
+    }
+
+    /**
+     * # 内部方法-要使用此方法时最好先咨询作者！！！
+     *
+     * @param isFallbackVersion 仅供特殊情况内部使用 如果某功能出错此开关可以回退至之前版本
+     * @return
+     */
+    public PictureSelectionModel isFallbackVersion3(boolean isFallbackVersion) {
+        selectionConfig.isFallbackVersion3 = isFallbackVersion;
         return this;
     }
 
@@ -406,17 +787,51 @@ public class PictureSelectionModel {
     public void forResult(int requestCode) {
         if (!DoubleUtils.isFastDoubleClick()) {
             Activity activity = selector.getActivity();
-            if (activity == null) {
+            if (activity == null || selectionConfig == null) {
                 return;
             }
-            Intent intent = new Intent(activity, PictureSelectorActivity.class);
+            Intent intent = new Intent(activity, selectionConfig.camera
+                    ? PictureSelectorCameraEmptyActivity.class :
+                    selectionConfig.isWeChatStyle ? PictureSelectorWeChatStyleActivity.class
+                            : PictureSelectorActivity.class);
             Fragment fragment = selector.getFragment();
             if (fragment != null) {
                 fragment.startActivityForResult(intent, requestCode);
             } else {
                 activity.startActivityForResult(intent, requestCode);
             }
-            activity.overridePendingTransition(R.anim.a5, 0);
+            PictureWindowAnimationStyle windowAnimationStyle = selectionConfig.windowAnimationStyle;
+            activity.overridePendingTransition(windowAnimationStyle != null &&
+                    windowAnimationStyle.activityEnterAnimation != 0 ?
+                    windowAnimationStyle.activityEnterAnimation :
+                    R.anim.picture_anim_enter, R.anim.picture_anim_fade_in);
+        }
+    }
+
+    /**
+     * # replace for setPictureWindowAnimationStyle();
+     * Start to select media and wait for result.
+     *
+     * @param requestCode Identity of the request Activity or Fragment.
+     */
+    @Deprecated
+    public void forResult(int requestCode, int enterAnim, int exitAnim) {
+        if (!DoubleUtils.isFastDoubleClick()) {
+            Activity activity = selector.getActivity();
+            if (activity == null) {
+                return;
+            }
+            Intent intent = new Intent(activity, selectionConfig != null && selectionConfig.camera
+                    ? PictureSelectorCameraEmptyActivity.class :
+                    selectionConfig.isWeChatStyle ? PictureSelectorWeChatStyleActivity.class :
+                            PictureSelectorActivity.class);
+            Fragment fragment = selector.getFragment();
+            if (fragment != null) {
+                fragment.startActivityForResult(intent, requestCode);
+            } else {
+                activity.startActivityForResult(intent, requestCode);
+            }
+            activity.overridePendingTransition(enterAnim, exitAnim);
         }
     }
 
@@ -428,7 +843,10 @@ public class PictureSelectionModel {
      */
     public void openExternalPreview(int position, List<LocalMedia> medias) {
         if (selector != null) {
-            selector.externalPicturePreview(position, medias);
+            selector.externalPicturePreview(position, medias,
+                    selectionConfig.windowAnimationStyle != null &&
+                            selectionConfig.windowAnimationStyle.activityPreviewEnterAnimation != 0
+                            ? selectionConfig.windowAnimationStyle.activityPreviewEnterAnimation : 0);
         } else {
             throw new NullPointerException("This PictureSelector is Null");
         }
@@ -442,7 +860,10 @@ public class PictureSelectionModel {
      */
     public void openExternalPreview(int position, String directory_path, List<LocalMedia> medias) {
         if (selector != null) {
-            selector.externalPicturePreview(position, directory_path, medias);
+            selector.externalPicturePreview(position, directory_path, medias,
+                    selectionConfig.windowAnimationStyle != null &&
+                            selectionConfig.windowAnimationStyle.activityPreviewEnterAnimation != 0
+                            ? selectionConfig.windowAnimationStyle.activityPreviewEnterAnimation : 0);
         } else {
             throw new NullPointerException("This PictureSelector is Null");
         }

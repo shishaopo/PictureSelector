@@ -7,21 +7,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author：luck
- * project：PictureSelector
- * package：com.luck.picture.entity
- * email：893855882@qq.com
- * data：16/12/31
+ * @author：luck
+ * @date：2016-12-31 15:21
+ * @describe：MediaFolder Entity
  */
-public class LocalMediaFolder implements Parcelable {
-    private String name;
-    private String path;
-    private String firstImagePath;
-    private int imageNum;
-    private int checkedNum;
-    private boolean isChecked;
-    private List<LocalMedia> images = new ArrayList<LocalMedia>();
 
+public class LocalMediaFolder implements Parcelable {
+    /**
+     * Folder name
+     */
+    private String name;
+    /**
+     * Folder first path
+     */
+    private String firstImagePath;
+    /**
+     * Folder media num
+     */
+    private int imageNum;
+    /**
+     * If the selected num
+     */
+    private int checkedNum;
+    /**
+     * If the selected
+     */
+    private boolean isChecked;
+
+    /**
+     * type
+     */
+    private int ofAllType = -1;
+    /**
+     * Whether or not the camera
+     */
+    private boolean isCameraFolder;
+
+    private List<LocalMedia> images = new ArrayList<LocalMedia>();
 
     public boolean isChecked() {
         return isChecked;
@@ -39,13 +61,6 @@ public class LocalMediaFolder implements Parcelable {
         this.name = name;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
 
     public String getFirstImagePath() {
         return firstImagePath;
@@ -82,6 +97,25 @@ public class LocalMediaFolder implements Parcelable {
         this.checkedNum = checkedNum;
     }
 
+    public int getOfAllType() {
+        return ofAllType;
+    }
+
+    public void setOfAllType(int ofAllType) {
+        this.ofAllType = ofAllType;
+    }
+
+    public boolean isCameraFolder() {
+        return isCameraFolder;
+    }
+
+    public void setCameraFolder(boolean cameraFolder) {
+        isCameraFolder = cameraFolder;
+    }
+
+    public LocalMediaFolder() {
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -90,28 +124,27 @@ public class LocalMediaFolder implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.name);
-        dest.writeString(this.path);
         dest.writeString(this.firstImagePath);
         dest.writeInt(this.imageNum);
         dest.writeInt(this.checkedNum);
         dest.writeByte(this.isChecked ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.ofAllType);
+        dest.writeByte(this.isCameraFolder ? (byte) 1 : (byte) 0);
         dest.writeTypedList(this.images);
-    }
-
-    public LocalMediaFolder() {
     }
 
     protected LocalMediaFolder(Parcel in) {
         this.name = in.readString();
-        this.path = in.readString();
         this.firstImagePath = in.readString();
         this.imageNum = in.readInt();
         this.checkedNum = in.readInt();
         this.isChecked = in.readByte() != 0;
+        this.ofAllType = in.readInt();
+        this.isCameraFolder = in.readByte() != 0;
         this.images = in.createTypedArrayList(LocalMedia.CREATOR);
     }
 
-    public static final Parcelable.Creator<LocalMediaFolder> CREATOR = new Parcelable.Creator<LocalMediaFolder>() {
+    public static final Creator<LocalMediaFolder> CREATOR = new Creator<LocalMediaFolder>() {
         @Override
         public LocalMediaFolder createFromParcel(Parcel source) {
             return new LocalMediaFolder(source);

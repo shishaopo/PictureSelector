@@ -1,34 +1,23 @@
 package com.luck.picture.lib.tools;
 
-import android.graphics.drawable.Drawable;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.style.RelativeSizeSpan;
 import android.widget.TextView;
 
 import com.luck.picture.lib.R;
 import com.luck.picture.lib.config.PictureMimeType;
 
+import java.util.regex.Pattern;
+
 /**
- * author：luck
- * project：PictureSelector
- * package：com.luck.picture.lib.tool
- * email：893855882@qq.com
- * data：2017/5/25
+ * @author：luck
+ * @data：2017/5/25 19:12
+ * @描述: String Utils
  */
-
 public class StringUtils {
-    public static boolean isCamera(String title) {
-        if (!TextUtils.isEmpty(title) && title.startsWith("相机胶卷")
-                || title.startsWith("CameraRoll")
-                || title.startsWith("所有音频")
-                || title.startsWith("All audio")) {
-            return true;
-        }
-
-        return false;
-    }
 
     public static void tempTextFont(TextView tv, int mimeType) {
         String text = tv.getText().toString().trim();
@@ -42,18 +31,33 @@ public class StringUtils {
         tv.setText(placeSpan);
     }
 
-    public static void modifyTextViewDrawable(TextView v, Drawable drawable, int index) {
-        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
-        //index 0:左 1：上 2：右 3：下
-        if (index == 0) {
-            v.setCompoundDrawables(drawable, null, null, null);
-        } else if (index == 1) {
-            v.setCompoundDrawables(null, drawable, null, null);
-        } else if (index == 2) {
-            v.setCompoundDrawables(null, null, drawable, null);
-        } else {
-            v.setCompoundDrawables(null, null, null, drawable);
-        }
+    /**
+     * 匹配数值
+     *
+     * @param str
+     * @return
+     */
+    public static int stringToInt(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]+$");
+        return pattern.matcher(str).matches() ? Integer.valueOf(str) : 0;
     }
 
+    /**
+     * 根据类型获取相应的Toast文案
+     *
+     * @param context
+     * @param mimeType
+     * @param maxSelectNum
+     * @return
+     */
+    @SuppressLint("StringFormatMatches")
+    public static String getToastMsg(Context context, String mimeType, int maxSelectNum) {
+        if (PictureMimeType.eqVideo(mimeType)) {
+            return context.getString(R.string.picture_message_video_max_num, maxSelectNum);
+        } else if (PictureMimeType.eqAudio(mimeType)) {
+            return context.getString(R.string.picture_message_audio_max_num, maxSelectNum);
+        } else {
+            return context.getString(R.string.picture_message_max_num, maxSelectNum);
+        }
+    }
 }
